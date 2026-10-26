@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#08111f">
-<title>FLIGHTDECK 3.0 — Aviator Stats Lab</title>
+<title>FLIGHTDECK 3.1 — Aviator Stats Lab</title>
 <style>
 :root{--bg:#07101d;--panel:#101c2d;--panel2:#14243a;--line:#263750;--text:#eef5ff;--muted:#9db0c9;--cyan:#4de3e8;--green:#7ef0b2;--red:#ff7d91;--gold:#ffd479}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#132744 0%,var(--bg) 55%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh}
@@ -55,7 +55,7 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,in
           <input id="backupFile" type="file" accept=".json,application/json" hidden>
           <button class="btn danger" id="clearBtn">Clear history</button>
         </div>
-        <p class="muted" id="message" aria-live="polite">Your entries are stored locally in this browser on this device.</p><p class="backup-note">Tip: download a JSON backup regularly. Browser-local data does not automatically sync between devices or browsers.</p>
+        <p class="muted" id="message" aria-live="polite">Your entries are stored locally in this browser on this device.</p><p class="backup-note">Data stays in this browser. Download a JSON backup regularly; backups do not sync automatically. Imports are checked before changes are applied.</p>
         <div class="notice">Responsible-use note: past multipliers do not determine the next result. This tool is for recording and descriptive analysis, not guaranteed predictions or betting advice.</div>
       </section>
       <section class="panel">
@@ -106,7 +106,7 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,in
       </section>
     </aside>
   </div>
-  <div class="footer">FLIGHTDECK 3.0 • Runs in your browser • No game connection • Local-first data with portable backups</div>
+  <div class="footer">FLIGHTDECK 3.1 • Runs in your browser • No game connection • Local-first data with portable backups</div>
 </div>
 <script>
 (() => {
@@ -115,11 +115,19 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,in
   const KEY = "flightdeck_aviator_rounds_v1";
   const $ = id => document.getElementById(id);
   let rounds = [];
+  let startupNotice = "";
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || "[]");
-    if (Array.isArray(saved)) rounds = saved.filter(x => x && Number.isFinite(Number(x.value)) && Number(x.value) >= 1)
-      .map(x => ({value:Number(x.value), ts:Number(x.ts)||Date.now(), session:String(x.session||"").slice(0,50)}));
-  } catch (_) { rounds = []; }
+    if (Array.isArray(saved)) {
+      rounds = saved.filter(x => x && Number.isFinite(Number(x.value)) && Number(x.value) >= 1)
+        .map(x => ({value:Number(x.value), ts:Number(x.ts)||Date.now(), session:String(x.session||"").slice(0,50)}));
+      if (rounds.length !== saved.length) startupNotice = "Some invalid saved entries were skipped. Download a backup and review your history.";
+    } else {
+      startupNotice = "Saved data was not in the expected format. It was left untouched; restore a known-good JSON backup if needed.";
+    }
+  } catch (_) {
+    startupNotice = "Saved data could not be read. The original browser storage was left untouched; restore a known-good JSON backup if needed.";
+  }
 
   const fmt = n => Number(n).toFixed(2) + "x";
   const median = arr => { if(!arr.length) return null; const a=[...arr].sort((x,y)=>x-y), m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; };
@@ -127,7 +135,15 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,in
   const category = v => v < 2 ? ["Below 2x","low"] : v < 10 ? ["2x–9.99x","mid"] : ["10x+","high"];
   const sessionName = r => (r.session && r.session.trim()) ? r.session.trim() : "Unassigned";
   const nowText = ts => { try { return new Date(ts).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); } catch (_) { return "—"; } };
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify(rounds)); } catch(e) { setMessage("Could not save locally. Download a backup and check browser storage settings."); } }
+  function save(){
+    try {
+      localStorage.setItem(KEY, JSON.stringify(rounds));
+      return true;
+    } catch(e) {
+      setMessage("Could not save changes to browser storage. Your latest changes may not survive refresh. Download/export a backup and free browser storage before continuing.");
+      return false;
+    }
+  }
   function setMessage(s){ $("message").textContent=s; }
   function getFiltered(){
     const from = $("filterFrom").value ? new Date($("filterFrom").value+"T00:00:00").getTime() : null;
@@ -149,8 +165,10 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,in
     const valid=values.map(Number).filter(v=>Number.isFinite(v)&&v>=1);
     if(!valid.length){setMessage("No valid multipliers found. Enter numbers of 1.00x or higher.");return;}
     const timestamp=Date.now(), session=$("sessionName").value.trim().slice(0,50);
+    const before = rounds.slice();
     valid.forEach((value,i)=>rounds.push({value:Number(value.toFixed(2)),ts:timestamp+i,session}));
-    save(); updateSessionOptions(); render(); $("multipliers").value="";
+    if (!save()) { rounds = before; render(); return; }
+    updateSessionOptions(); render(); $("multipliers").value="";
     setMessage(`Added ${valid.length} round${valid.length===1?"":"s"}${session?` to “${session}”`:""}. History saved in this browser.`);
   }
   function render(){
@@ -216,16 +234,88 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,in
   $("applyFiltersBtn").addEventListener("click",render);
   $("resetFiltersBtn").addEventListener("click",()=>{$("filterFrom").value="";$("filterTo").value="";$("sessionFilter").value="all";$("windowSize").value="all";render();setMessage("Filters reset. Showing all recorded rounds.");});
   $("sessionFilter").addEventListener("change",render);
-  $("demoBtn").addEventListener("click",()=>{if(rounds.length&&!confirm("Add fictional demo data to your existing history? This will not replace your saved rounds."))return;const label="Demo data";[1.12,1.48,2.1,1.31,3.7,1.06,2.55,6.4,1.82,1.19,4.2,12.6,1.42,2.03,1.27,8.8,1.09,3.1,1.66,5.2].forEach((value,i)=>rounds.push({value,ts:Date.now()-(19-i)*60000,session:label}));save();updateSessionOptions();render();setMessage("Added fictional demo rounds in a separate “Demo data” session.");});
+  $("demoBtn").addEventListener("click",()=>{if(rounds.length&&!confirm("Add fictional demo data to your existing history? This will not replace your saved rounds."))return;const before=rounds.slice(),label="Demo data";[1.12,1.48,2.1,1.31,3.7,1.06,2.55,6.4,1.82,1.19,4.2,12.6,1.42,2.03,1.27,8.8,1.09,3.1,1.66,5.2].forEach((value,i)=>rounds.push({value,ts:Date.now()-(19-i)*60000,session:label}));if(!save()){rounds=before;render();return;}updateSessionOptions();render();setMessage("Added fictional demo rounds in a separate “Demo data” session.");});
   $("exportBtn").addEventListener("click",()=>{if(!rounds.length){setMessage("There are no rounds to export yet.");return;}const quote=s=>'"'+String(s).replace(/"/g,'""')+'"';const csv="multiplier,timestamp,session\r\n"+rounds.map(r=>`${r.value},${new Date(r.ts).toISOString()},${quote(sessionName(r)==="Unassigned"?"":sessionName(r))}`).join("\r\n");downloadBlob(new Blob([csv],{type:"text/csv;charset=utf-8;"}),"flightdeck-rounds.csv");setMessage("CSV export started, including timestamps and session labels.");});
+  function parseCSV(text) {
+    const rows=[]; let row=[], field="", quoted=false;
+    text=String(text).replace(/^\uFEFF/,"");
+    for(let i=0;i<text.length;i++){
+      const c=text[i], next=text[i+1];
+      if(quoted){
+        if(c==='"'&&next==='"'){field+='"';i++;}
+        else if(c==='"') quoted=false;
+        else field+=c;
+      } else {
+        if(c==='"'&&field==="") quoted=true;
+        else if(c===","){row.push(field);field="";}
+        else if(c==="\n"){row.push(field);rows.push(row);row=[];field="";}
+        else if(c==="\r"){if(next==="\n")i++;row.push(field);rows.push(row);row=[];field="";}
+        else field+=c;
+      }
+    }
+    if(quoted) throw new Error("CSV has an unclosed quotation mark. No data was imported.");
+    if(field.length||row.length){row.push(field);rows.push(row);}
+    return rows.filter(r=>r.some(v=>String(v).trim()!==""));
+  }
+  function roundSignature(r){return `${Number(r.value).toFixed(2)}|${Number(r.ts)}|${String(r.session||"").trim()}`;}
   $("importBtn").addEventListener("click",()=>$("csvFile").click());
-  $("csvFile").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const text=await file.text();const lines=text.replace(/^\uFEFF/,"").split(/\r?\n/).filter(line=>line.trim());const first=lines[0]||"";const hasHeader=/multiplier/i.test(first);const data=hasHeader?lines.slice(1):lines;const parsed=[];data.forEach(line=>{const cells=line.split(",");const value=Number(cells[0].replace(/^"|"$/g,"").trim());if(Number.isFinite(value)&&value>=1){const ts=cells[1]?Date.parse(cells[1].replace(/^"|"$/g,"")):Date.now()+parsed.length;const session=cells.slice(2).join(",").replace(/^"|"$/g,"").replace(/""/g,'"').trim();parsed.push({value:Number(value.toFixed(2)),ts:Number.isFinite(ts)?ts:Date.now()+parsed.length,session:session.slice(0,50)});}});if(!parsed.length)throw new Error("No valid multiplier values found in the CSV.");rounds.push(...parsed);save();updateSessionOptions();render();setMessage(`Imported ${parsed.length} multiplier values from CSV. Existing history was kept.`);}catch(err){setMessage(err.message||"Could not import that CSV file.");}e.target.value="";});
+  $("csvFile").addEventListener("change",async e=>{
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    try {
+      const rows=parseCSV(await file.text());
+      if(!rows.length) throw new Error("The CSV file is empty.");
+      const hasHeader=/multiplier/i.test(rows[0][0]||"")||/value/i.test(rows[0][0]||"");
+      const data=hasHeader?rows.slice(1):rows, parsed=[]; let skipped=0;
+      data.forEach((cells,i)=>{
+        const raw=String(cells[0]??"").trim();
+        const value=Number(raw);
+        if(!raw||!Number.isFinite(value)||value<1){skipped++;return;}
+        const parsedTs=cells[1]?Date.parse(String(cells[1]).trim()):NaN;
+        const ts=Number.isFinite(parsedTs)?parsedTs:Date.now()+i;
+        const session=String(cells[2]??"").trim().slice(0,50);
+        parsed.push({value:Number(value.toFixed(2)),ts,session});
+      });
+      if(!parsed.length) throw new Error("No valid multiplier values found. Nothing was changed.");
+      const existing=new Set(rounds.map(roundSignature));
+      const unique=parsed.filter(r=>!existing.has(roundSignature(r)));
+      const duplicates=parsed.length-unique.length;
+      if(!unique.length) throw new Error(`All ${parsed.length} valid rows already exist. No duplicate rounds were added.`);
+      const preview=`CSV import preview:\n• Valid rows: ${parsed.length}\n• New rows to add: ${unique.length}\n• Existing duplicates skipped: ${duplicates}\n• Invalid rows skipped: ${skipped}\n\nImport the new rows? Existing history will be kept.`;
+      if(!confirm(preview)) {setMessage("CSV import cancelled. Your history was not changed.");return;}
+      const before=rounds.slice();rounds.push(...unique);
+      if(!save()){rounds=before;render();return;}
+      updateSessionOptions();render();
+      setMessage(`Imported ${unique.length} new rounds. Skipped ${duplicates} duplicates and ${skipped} invalid rows.`);
+    } catch(err) { setMessage(err.message||"Could not import that CSV file."); }
+    finally { e.target.value=""; }
+  });
   $("backupBtn").addEventListener("click",()=>{const backup={format:"FLIGHTDECK_BACKUP",version:3,exportedAt:new Date().toISOString(),rounds};downloadBlob(new Blob([JSON.stringify(backup,null,2)],{type:"application/json;charset=utf-8"}),"flightdeck-backup.json");setMessage("JSON backup downloaded. Keep it somewhere safe.");});
   $("restoreBtn").addEventListener("click",()=>$("backupFile").click());
-  $("backupFile").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const parsed=JSON.parse(await file.text());const incoming=Array.isArray(parsed)?parsed:parsed.rounds;if(!Array.isArray(incoming))throw new Error("This file does not contain a FLIGHTDECK rounds backup.");const cleaned=incoming.filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1).map((r,i)=>({value:Number(Number(r.value).toFixed(2)),ts:Number(r.ts)||Date.now()+i,session:String(r.session||"").slice(0,50)}));if(!cleaned.length)throw new Error("No valid rounds were found in this backup.");if(!confirm(`Restore ${cleaned.length} rounds? Choose OK to merge them with current history, or Cancel to leave data unchanged.`))return;const merge=confirm("Merge backup with current history? Choose Cancel to replace current history with the backup. Download a backup first if unsure.");rounds=merge?[...rounds,...cleaned]:cleaned;save();updateSessionOptions();render();setMessage(`Restored ${cleaned.length} rounds${merge?" and merged with existing history":" from backup"}.`);}catch(err){setMessage(err.message||"Could not restore that backup.");}finally{e.target.value="";}});
-  $("clearBtn").addEventListener("click",()=>{if(!rounds.length){setMessage("History is already empty.");return;}if(confirm("Delete all recorded rounds from this browser? Download a JSON backup or export CSV first if you want to keep them.")){rounds=[];save();updateSessionOptions();render();setMessage("History cleared from this browser.");}});
+  $("backupFile").addEventListener("change",async e=>{
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    const before=rounds.slice();
+    try {
+      const parsed=JSON.parse(await file.text());
+      const incoming=Array.isArray(parsed)?parsed:parsed.rounds;
+      if(!Array.isArray(incoming)) throw new Error("This file does not contain a FLIGHTDECK rounds backup.");
+      const cleaned=incoming.filter(r=>r&&Number.isFinite(Number(r.value))&&Number(r.value)>=1)
+        .map((r,i)=>({value:Number(Number(r.value).toFixed(2)),ts:Number(r.ts)||Date.now()+i,session:String(r.session||"").slice(0,50)}));
+      if(!cleaned.length) throw new Error("No valid rounds were found. Existing history was not changed.");
+      const merge=confirm(`Restore ${cleaned.length} valid rounds?\n\nChoose OK to MERGE with existing history (duplicates are skipped).\nChoose Cancel to keep your current history unchanged.`);
+      if(!merge){setMessage("Restore cancelled. Existing history was not changed.");return;}
+      const existing=new Set(rounds.map(roundSignature));
+      const unique=cleaned.filter(r=>!existing.has(roundSignature(r)));
+      rounds.push(...unique);
+      if(!save()){rounds=before;render();return;}
+      updateSessionOptions();render();
+      setMessage(`Restored ${unique.length} new rounds; ${cleaned.length-unique.length} duplicates skipped. Existing history was preserved.`);
+    } catch(err){setMessage(err.message||"Could not restore that backup.");}
+    finally{e.target.value="";}
+  });
+  $("clearBtn").addEventListener("click",()=>{if(!rounds.length){setMessage("History is already empty.");return;}if(confirm("Delete all recorded rounds from this browser? Download a JSON backup or export CSV first if you want to keep them.")){const before=rounds.slice();rounds=[];if(!save()){rounds=before;render();return;}updateSessionOptions();render();setMessage("History cleared from this browser.");}});
   window.addEventListener("resize",()=>drawChart(getFiltered().map(r=>r.value).slice(-20)));
   render();
+  if (startupNotice) setMessage(startupNotice);
 })();
 </script>
 </body>
