@@ -3,85 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101014">
-<meta name="description" content="Aviator historical multiplier statistics dashboard">
-<title>FlightDeck — Aviator Stats Lab</title>
+<meta name="theme-color" content="#08111f">
+<title>FLIGHTDECK 2.0 — Aviator Stats Lab</title>
 <style>
-:root{--bg:#0d0d12;--panel:#17171f;--panel2:#20202a;--text:#f5f5f7;--muted:#a6a6b3;--red:#ff4657;--line:#30303b;--green:#53df9a;--gold:#ffc96b}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#2b1019 0,transparent 35%),var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{padding:22px max(18px,calc((100% - 1050px)/2));border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{font-size:20px;font-weight:850;letter-spacing:.4px}.brand span{color:var(--red)}.badge{font-size:11px;border:1px solid #5d343b;color:#ffb7be;border-radius:99px;padding:6px 9px}
-main{max-width:1050px;margin:auto;padding:22px 16px 50px}.intro h1{font-size:clamp(27px,5vw,42px);line-height:1.08;margin:8px 0}.intro p{color:var(--muted);max-width:700px;line-height:1.55;margin:10px 0 22px}
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}.card{background:linear-gradient(145deg,var(--panel),#131319);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}.card h2{font-size:16px;margin:0 0 14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:15px}.stat{background:var(--panel2);border-radius:12px;padding:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:22px;margin-top:4px;overflow-wrap:anywhere}
-label{font-size:12px;color:var(--muted);display:block;margin-bottom:7px}textarea,input,select,button{font:inherit}textarea,input,select{width:100%;color:var(--text);background:#101016;border:1px solid #3a3a47;border-radius:10px;padding:11px;outline:none}textarea{min-height:95px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--red)}
-.row{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}.row>*{flex:1}.btn{border:0;border-radius:10px;padding:11px 13px;cursor:pointer;font-weight:750}.primary{background:var(--red);color:white}.secondary{background:#30303c;color:white;border:1px solid #454552}.danger{background:#392027;color:#ffc2c7;border:1px solid #63343d}
-.note{font-size:12px;line-height:1.5;color:var(--muted);margin-top:12px}.signal{background:#101016;border:1px solid var(--line);padding:15px;border-radius:13px}.signal .big{font-size:30px;font-weight:850;margin:5px 0}.signal p{color:var(--muted);font-size:13px;line-height:1.5;margin:5px 0}
-.pills{display:flex;gap:7px;flex-wrap:wrap}.pill{border-radius:8px;padding:8px 10px;font-weight:700;font-size:13px;background:#252530;border:1px solid #3b3b48}.low{color:#ff8792}.mid{color:var(--gold)}.high{color:var(--green)}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px 7px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}.empty{color:var(--muted);padding:20px 0;text-align:center}
-.chart{height:160px;display:flex;align-items:end;gap:5px;padding:15px 2px 0;border-bottom:1px solid var(--line);overflow:hidden}.barwrap{flex:1;min-width:7px;display:flex;flex-direction:column;align-items:center;justify-content:end;height:100%;gap:5px}.bar{width:100%;max-width:24px;border-radius:5px 5px 0 0;background:var(--red);min-height:3px}.barlabel{font-size:9px;color:var(--muted);white-space:nowrap}
-footer{color:var(--muted);font-size:11px;line-height:1.5;text-align:center;margin-top:22px}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.stats{gap:6px}.stat{padding:10px}.stat strong{font-size:19px}header{padding:17px}.intro p{font-size:14px}}
+:root{--bg:#07101d;--panel:#101c2d;--panel2:#14243a;--line:#263750;--text:#eef5ff;--muted:#9db0c9;--cyan:#4de3e8;--green:#7ef0b2;--red:#ff7d91;--gold:#ffd479}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#132744 0%,var(--bg) 55%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh}
+.wrap{max-width:1180px;margin:auto;padding:20px 14px 42px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#4de3e8,#7ef0b2);display:grid;place-items:center;color:#07101d;font-weight:900;font-size:22px;box-shadow:0 0 26px #4de3e833}.eyebrow{font-size:11px;letter-spacing:2px;color:var(--cyan);font-weight:800}.brand h1{font-size:clamp(23px,4vw,32px);margin:2px 0 0;letter-spacing:-.8px}.status{border:1px solid #31536a;background:#10283a;border-radius:999px;padding:8px 12px;color:var(--green);font-size:12px;font-weight:700}
+.hero{border:1px solid #29415c;background:linear-gradient(120deg,#11243aee,#0d1a2aee);border-radius:22px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:220px;height:220px;border:1px solid #4de3e81c;border-radius:50%;right:-80px;top:-100px;box-shadow:0 0 0 25px #4de3e80a,0 0 0 50px #4de3e807;pointer-events:none}.hero h2{margin:0 0 7px;font-size:clamp(20px,4vw,27px)}.hero p{margin:0;color:var(--muted);max-width:740px;line-height:1.5;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.stat,.panel{background:linear-gradient(160deg,#122137,#0d1929);border:1px solid var(--line);border-radius:18px}.stat{padding:15px;min-height:112px}.label{color:var(--muted);font-size:12px}.value{font-size:clamp(23px,3.5vw,31px);font-weight:850;letter-spacing:-.8px;margin:8px 0 4px;overflow-wrap:anywhere}.sub{color:var(--muted);font-size:11px}.layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:14px}.panel{padding:17px;margin-bottom:14px}.panel h3{font-size:16px;margin:0 0 14px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.pill{font-size:11px;color:var(--cyan);border:1px solid #2a5364;border-radius:99px;padding:5px 8px}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}textarea,input,select{width:100%;background:#081422;border:1px solid #30445e;border-radius:11px;color:var(--text);padding:12px;font:inherit;outline:none}textarea{min-height:88px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #4de3e817}.formrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{border:1px solid #334962;background:#192a40;color:var(--text);border-radius:11px;padding:10px 13px;font-weight:750;font-size:12px;cursor:pointer}.btn:hover{filter:brightness(1.15)}.primary{background:linear-gradient(120deg,#4de3e8,#7ef0b2);color:#06121b;border:0}.danger{border-color:#6d3344;color:#ffb0bd;background:#321b2a}.muted{color:var(--muted);font-size:12px;line-height:1.5}.chartbox{height:230px;position:relative}.chartbox canvas{width:100%;height:100%;display:block}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:6px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--cyan)}.barlist{display:grid;gap:12px}.barrow{display:grid;grid-template-columns:80px 1fr 45px;gap:9px;align-items:center;font-size:12px}.bartrack{height:8px;border-radius:99px;background:#223249;overflow:hidden}.barfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--green))}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:420px;font-size:12px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #24354b}th{color:var(--muted);font-weight:700}td{color:#e6effc}.mult{font-weight:800}.low{color:var(--red)}.mid{color:var(--gold)}.high{color:var(--green)}.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}.notice{border:1px solid #594a2b;background:#292315;color:#ffe2a2;border-radius:13px;padding:12px;font-size:12px;line-height:1.5;margin-top:14px}.footer{text-align:center;color:#7288a4;font-size:11px;margin-top:20px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.chartbox{height:210px}}
+@media(max-width:420px){.wrap{padding:14px 10px 30px}.panel{padding:13px}.stat{padding:12px;min-height:102px}.formrow{grid-template-columns:1fr}.brand h1{font-size:23px}.hero{padding:16px}}
 </style>
 </head>
 <body>
-<header><div class="brand">✈ FLIGHT<span>DECK</span></div><div class="badge">STATS LAB · BETA</div></header>
-<main>
-<section class="intro"><h1>Read the history.<br><span style="color:var(--red)">Not the future.</span></h1><p>A mobile-friendly Aviator multiplier tracker. Enter results to explore historical frequencies and target hit rates. It does not know or reliably predict the next crash.</p></section>
-<div class="stats">
-<div class="stat"><small>ROUNDS RECORDED</small><strong id="roundCount">0</strong></div>
-<div class="stat"><small>HISTORICAL AVERAGE</small><strong id="average">—</strong></div>
-<div class="stat"><small>MEDIAN</small><strong id="median">—</strong></div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">✈</div><div><div class="eyebrow">AVIATOR STATS LAB</div><h1>FLIGHTDECK <span style="color:var(--cyan)">2.0</span></h1></div></div>
+    <div class="status">● LOCAL ANALYTICS ACTIVE</div>
+  </header>
+  <section class="hero">
+    <h2>Read the history. Don't mistake it for a prediction.</h2>
+    <p>Record multipliers, explore historical patterns, and export your data. FLIGHTDECK analyses only the rounds you enter; it is not connected to the Aviator game and cannot reliably predict future outcomes.</p>
+  </section>
+  <section class="grid">
+    <div class="stat"><div class="label">ROUNDS RECORDED</div><div class="value" id="count">0</div><div class="sub">Saved in this browser</div></div>
+    <div class="stat"><div class="label">AVERAGE MULTIPLIER</div><div class="value" id="average">—</div><div class="sub">Arithmetic mean</div></div>
+    <div class="stat"><div class="label">MEDIAN MULTIPLIER</div><div class="value" id="median">—</div><div class="sub">Middle value</div></div>
+    <div class="stat"><div class="label">HIGHEST RECORDED</div><div class="value" id="highest">—</div><div class="sub">From your saved history</div></div>
+  </section>
+  <div class="layout">
+    <main>
+      <section class="panel">
+        <div class="section-head"><h3>Round history</h3><span class="pill">MANUAL ENTRY</span></div>
+        <label for="multipliers">Enter multipliers separated by commas, spaces or new lines</label>
+        <textarea id="multipliers" placeholder="Example: 1.25, 2.40, 5.60, 1.08, 10.20"></textarea>
+        <div class="formrow">
+          <div><label for="target">Target multiplier (x)</label><input id="target" type="number" min="1.01" step="0.01" value="2.00"></div>
+          <div><label for="windowSize">Recent-round window</label><select id="windowSize"><option value="10">Last 10 rounds</option><option value="20" selected>Last 20 rounds</option><option value="50">Last 50 rounds</option><option value="100">Last 100 rounds</option></select></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="addBtn">Add rounds</button>
+          <button class="btn" id="demoBtn">Load demo data</button>
+          <button class="btn" id="exportBtn">Export CSV</button>
+          <button class="btn" id="importBtn">Import CSV</button>
+          <input id="csvFile" type="file" accept=".csv,text/csv,text/plain" hidden>
+          <button class="btn danger" id="clearBtn">Clear history</button>
+        </div>
+        <p class="muted" id="message" aria-live="polite">Your entries are stored locally in this browser on this device.</p>
+        <div class="notice">Responsible-use note: past multipliers do not determine the next result. This tool is for recording and descriptive analysis, not guaranteed predictions or betting advice.</div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><h3>Recent multiplier trend</h3><span class="pill" id="chartLabel">LAST 20 ROUNDS</span></div>
+        <div class="chartbox"><canvas id="chart" aria-label="Chart of recorded multipliers"></canvas></div>
+        <div class="legend"><span><i class="dot"></i>Multiplier history</span><span style="color:var(--muted)">Chart scale adjusts to recorded values</span></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><h3>Latest rounds</h3><span class="pill" id="tableCount">0 ROUNDS</span></div>
+        <div class="tablewrap"><table><thead><tr><th>#</th><th>Multiplier</th><th>Category</th><th>Recorded</th></tr></thead><tbody id="roundRows"><tr><td colspan="4" class="empty">No rounds recorded yet.</td></tr></tbody></table></div>
+      </section>
+    </main>
+    <aside>
+      <section class="panel">
+        <h3>Target-hit analysis</h3>
+        <div class="stat" style="min-height:auto;margin-bottom:13px"><div class="label">ROUNDS AT OR ABOVE TARGET</div><div class="value" id="hitRate">—</div><div class="sub" id="hitDetail">Add recorded rounds to calculate.</div></div>
+        <div class="barlist" id="targetBars"></div>
+        <p class="muted" style="margin-bottom:0">Historical frequency is not the probability of the next round.</p>
+      </section>
+      <section class="panel">
+        <h3>Multiplier distribution</h3>
+        <div class="barlist" id="distribution"></div>
+      </section>
+      <section class="panel">
+        <h3>Streak & volatility</h3>
+        <div class="formrow" style="margin-top:0">
+          <div><div class="label">Longest below-target run</div><div class="value" id="longestLow">—</div></div>
+          <div><div class="label">Current below-target run</div><div class="value" id="currentLow">—</div></div>
+        </div>
+        <div class="label">Recent range</div><div class="value" id="range">—</div>
+        <div class="label">Recent standard deviation</div><div class="value" id="volatility">—</div>
+        <p class="muted">Streaks and volatility summarize past observations only; they do not signal when a high multiplier is “due.”</p>
+      </section>
+    </aside>
+  </div>
+  <div class="footer">FLIGHTDECK 2.0 • Runs in your browser • No game connection • Local data stays in this browser</div>
 </div>
-<div class="grid">
-<section class="card">
-<h2>＋ Add round results</h2>
-<label for="multipliers">Enter multipliers separated by commas or spaces (example: 1.24, 2.10, 1.03, 5.60)</label>
-<textarea id="multipliers" placeholder="1.24, 2.10, 1.03, 5.60"></textarea>
-<div class="row"><button class="btn primary" id="addBtn">Add results</button><button class="btn secondary" id="demoBtn">Load demo data</button></div>
-<div class="row"><button class="btn secondary" id="exportBtn">Export CSV</button><button class="btn danger" id="clearBtn">Clear history</button></div>
-<p class="note">Results are saved in this browser on this device. Demo data is fictional and clearly for testing; it is not live game data.</p>
-</section>
-<section class="card">
-<h2>◎ Historical target frequency</h2>
-<label for="target">Target multiplier</label>
-<div class="row" style="margin-top:0"><select id="target"><option value="1.5">1.50x</option><option value="2">2.00x</option><option value="3">3.00x</option><option value="5">5.00x</option><option value="10">10.00x</option></select><button class="btn primary" id="calcBtn">Calculate</button></div>
-<div class="signal" style="margin-top:12px"><div style="color:var(--muted);font-size:11px">PAST ROUNDS AT OR ABOVE TARGET</div><div class="big" id="hitRate">—</div><p id="hitDetail">Add results to calculate historical frequency.</p></div>
-<p class="note">This percentage describes only the rounds you entered. It is not a forecast of the next round or a betting recommendation.</p>
-</section>
-<section class="card">
-<h2>▥ Recent multiplier history</h2><div id="chart" class="chart"><div class="empty" style="width:100%">Your chart will appear here after adding results.</div></div>
-<div class="pills" style="margin-top:12px"><span class="pill low">Below 2x: <b id="below2">—</b></span><span class="pill mid">2x–<5x: <b id="between">—</b></span><span class="pill high">5x+: <b id="above5">—</b></span></div>
-</section>
-<section class="card">
-<h2>☷ Latest recorded rounds</h2><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Multiplier</th><th>Band</th></tr></thead><tbody id="historyRows"><tr><td colspan="3" class="empty">No results recorded yet.</td></tr></tbody></table></div>
-</section>
-</div>
-<footer>For statistical exploration and educational use only. Crash-game outcomes may be random or generated by systems you cannot observe. Historical patterns do not guarantee future results. Never stake money you cannot afford to lose.</footer>
-</main>
 <script>
-const KEY='flightdeck_history_v1';let rounds=[];
-try{rounds=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(rounds))rounds=[];}catch(e){rounds=[]}
-const $=id=>document.getElementById(id);
-function save(){localStorage.setItem(KEY,JSON.stringify(rounds));render();}
-function fmt(x){return Number(x).toFixed(2)+'x'}
-function median(a){const s=[...a].sort((x,y)=>x-y),m=Math.floor(s.length/2);return s.length?(s.length%2?s[m]:(s[m-1]+s[m])/2):null}
-function render(){
- const n=rounds.length,avg=n?rounds.reduce((s,x)=>s+x,0)/n:null,med=median(rounds);
- $('roundCount').textContent=n;$('average').textContent=avg===null?'—':fmt(avg);$('median').textContent=med===null?'—':fmt(med);
- const bands=[rounds.filter(x=>x<2).length,rounds.filter(x=>x>=2&&x<5).length,rounds.filter(x=>x>=5).length];
- $('below2').textContent=n?(100*bands[0]/n).toFixed(1)+'%':'—';$('between').textContent=n?(100*bands[1]/n).toFixed(1)+'%':'—';$('above5').textContent=n?(100*bands[2]/n).toFixed(1)+'%':'—';
- const target=Number($('target').value),hits=rounds.filter(x=>x>=target).length;
- $('hitRate').textContent=n?(100*hits/n).toFixed(1)+'%':'—';
- $('hitDetail').textContent=n?`${hits} of ${n} recorded rounds reached ${fmt(target)} or higher.`:'Add results to calculate historical frequency.';
- const recent=rounds.slice(-24);const max=Math.max(5,...recent);
- $('chart').innerHTML=recent.length?recent.map((x,i)=>`<div class="barwrap" title="Round ${n-recent.length+i+1}: ${fmt(x)}"><div class="bar" style="height:${Math.max(3,Math.min(100,x/max*100))}%"></div><div class="barlabel">${x.toFixed(1)}</div></div>`).join(''):'<div class="empty" style="width:100%">Your chart will appear here after adding results.</div>';
- $('historyRows').innerHTML=n?[...rounds].slice(-20).reverse().map((x,i)=>`<tr><td>${n-i}</td><td><b>${fmt(x)}</b></td><td class="${x<2?'low':x<5?'mid':'high'}">${x<2?'Below 2x':x<5?'2x–4.99x':'5x+'}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">No results recorded yet.</td></tr>';
-}
-$('addBtn').onclick=()=>{const raw=$('multipliers').value.trim();if(!raw){alert('Enter one or more multipliers first.');return;}const parts=raw.split(/[,\s;]+/).filter(Boolean),vals=parts.map(x=>Number(x.toLowerCase().endsWith('x')?x.slice(0,-1):x));if(vals.some(x=>!Number.isFinite(x)||x<1||x>100000)){alert('Please enter valid multipliers from 1.00x to 100000x.');return;}rounds.push(...vals);save();$('multipliers').value='';};
-$('demoBtn').onclick=()=>{if(rounds.length&&!confirm('Add fictional demo results to your existing history?'))return;rounds.push(...[1.12,1.45,2.36,1.03,3.82,1.76,6.24,1.09,2.01,1.31,4.56,1.88,12.4,1.22,2.74,1.01,5.32,1.67,2.18,1.39]);save();};
-$('calcBtn').onclick=render;$('target').onchange=render;
-$('clearBtn').onclick=()=>{if(confirm('Clear all saved multiplier history from this browser?')){rounds=[];save();}};
-$('exportBtn').onclick=()=>{if(!rounds.length){alert('No data to export yet.');return;}const csv='round,multiplier\\n'+rounds.map((x,i)=>`${i+1},${x}`).join('\\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='flightdeck-history.csv';a.click();URL.revokeObjectURL(a.href);};
-render();
+(() => {
+  "use strict";
+  const KEY = "flightdeck_aviator_rounds_v1";
+  const $ = id => document.getElementById(id);
+  let rounds = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "[]");
+    if (Array.isArray(saved)) rounds = saved.filter(x => x && Number.isFinite(Number(x.value)) && Number(x.value) >= 1);
+  } catch (_) { rounds = []; }
+  const fmt = n => Number(n).toFixed(2) + "x";
+  const nowText = ts => { try { return new Date(ts).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); } catch (_) { return "—"; } };
+  const median = arr => { if(!arr.length) return null; const a=[...arr].sort((x,y)=>x-y), m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; };
+  const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+  const category = v => v < 2 ? ["Below 2x","low"] : v < 10 ? ["2x–9.99x","mid"] : ["10x+","high"];
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(rounds)); } catch(e) { setMessage("Could not save locally. Your browser storage may be full or disabled."); } }
+  function setMessage(s){ $("message").textContent=s; }
+  function addValues(values){
+    const valid=values.map(Number).filter(v=>Number.isFinite(v)&&v>=1);
+    if(!valid.length){setMessage("No valid multipliers found. Enter numbers of 1.00x or higher.");return;}
+    const timestamp=Date.now();
+    valid.forEach((value,i)=>rounds.push({value:Number(value.toFixed(2)),ts:timestamp+i}));
+    save(); render(); $("multipliers").value="";
+    setMessage(`Added ${valid.length} round${valid.length===1?"":"s"}. History saved in this browser.`);
+  }
+  function render(){
+    const vals=rounds.map(r=>r.value), n=vals.length;
+    $("count").textContent=n;
+    $("average").textContent=n?fmt(avg(vals)):"—";
+    $("median").textContent=n?fmt(median(vals)):"—";
+    $("highest").textContent=n?fmt(Math.max(...vals)):"—";
+    const target=Math.max(1,Number($("target").value)||2);
+    const hits=vals.filter(v=>v>=target).length;
+    $("hitRate").textContent=n?(hits/n*100).toFixed(1)+"%":"—";
+    $("hitDetail").textContent=n?`${hits} of ${n} recorded rounds were at least ${fmt(target)}.`:"Add recorded rounds to calculate.";
+    $("targetBars").innerHTML="";
+    [1.5,2,5,10].forEach(t=>{
+      const count=vals.filter(v=>v>=t).length, pct=n?count/n*100:0;
+      $("targetBars").insertAdjacentHTML("beforeend",`<div class="barrow"><span>${t.toFixed(2)}x+</span><div class="bartrack"><div class="barfill" style="width:${pct}%"></div></div><strong>${n?pct.toFixed(0)+"%":"—"}</strong></div>`);
+    });
+    const bins=[{label:"Below 2x",test:v=>v<2},{label:"2x to 4.99x",test:v=>v>=2&&v<5},{label:"5x to 9.99x",test:v=>v>=5&&v<10},{label:"10x and above",test:v=>v>=10}];
+    $("distribution").innerHTML="";
+    bins.forEach(b=>{const c=vals.filter(b.test).length,p=n?c/n*100:0;$("distribution").insertAdjacentHTML("beforeend",`<div class="barrow"><span>${b.label}</span><div class="bartrack"><div class="barfill" style="width:${p}%"></div></div><strong>${n?p.toFixed(0)+"%":"—"}</strong></div>`);});
+    let longest=0,current=0,run=0;
+    vals.forEach(v=>{if(v<target){run++;longest=Math.max(longest,run)}else run=0;});
+    for(let i=vals.length-1;i>=0&&vals[i]<target;i--)current++;
+    $("longestLow").textContent=n?longest:"—"; $("currentLow").textContent=n?current:"—";
+    const recent=vals.slice(-Math.max(1,Number($("windowSize").value)||20));
+    $("range").textContent=recent.length?fmt(Math.max(...recent)-Math.min(...recent)):"—";
+    const mean=avg(recent), sd=recent.length?Math.sqrt(recent.reduce((s,v)=>s+Math.pow(v-mean,2),0)/recent.length):null;
+    $("volatility").textContent=sd===null?"—":fmt(sd);
+    $("chartLabel").textContent=`LAST ${recent.length} ROUND${recent.length===1?"":"S"}`;
+    $("tableCount").textContent=`${Math.min(n,15)} OF ${n} ROUNDS`;
+    const show=rounds.slice(-15).reverse();
+    $("roundRows").innerHTML=show.length?show.map((r,i)=>{const c=category(r.value);return `<tr><td>${n-i}</td><td class="mult ${c[1]}">${fmt(r.value)}</td><td>${c[0]}</td><td>${nowText(r.ts)}</td></tr>`;}).join(""):'<tr><td colspan="4" class="empty">No rounds recorded yet.</td></tr>';
+    drawChart(recent);
+  }
+  function drawChart(values){
+    const canvas=$("chart"), rect=canvas.getBoundingClientRect(), dpr=Math.max(1,window.devicePixelRatio||1);
+    canvas.width=Math.max(1,Math.round(rect.width*dpr));canvas.height=Math.max(1,Math.round(rect.height*dpr));
+    const ctx=canvas.getContext("2d");if(!ctx)return;ctx.scale(dpr,dpr);
+    const w=rect.width,h=rect.height,pad={l:34,r:10,t:15,b:25},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+    ctx.clearRect(0,0,w,h);ctx.font="10px system-ui";ctx.strokeStyle="#263750";ctx.fillStyle="#9db0c9";ctx.lineWidth=1;
+    if(!values.length){ctx.fillText("Add multipliers to view your trend",pad.l+5,h/2);return;}
+    const max=Math.max(2,...values), min=1, y=v=>pad.t+(max-v)/(max-min||1)*ch, x=i=>pad.l+(values.length===1?cw/2:i/(values.length-1)*cw);
+    for(let i=0;i<=4;i++){const yy=pad.t+i*ch/4;ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.fillText((max-i*(max-min)/4).toFixed(1)+"x",1,yy+3);}
+    ctx.beginPath();values.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.strokeStyle="#4de3e8";ctx.lineWidth=2;ctx.stroke();
+    values.forEach((v,i)=>{ctx.beginPath();ctx.arc(x(i),y(v),2.8,0,Math.PI*2);ctx.fillStyle=v>=10?"#7ef0b2":v>=2?"#ffd479":"#ff7d91";ctx.fill();});
+    ctx.fillStyle="#9db0c9";ctx.fillText("Oldest",pad.l,h-5);ctx.textAlign="right";ctx.fillText("Newest",w-pad.r,h-5);ctx.textAlign="left";
+  }
+  $("addBtn").addEventListener("click",()=>addValues($("multipliers").value.trim().split(/[\s,;]+/).filter(Boolean)));
+  $("target").addEventListener("input",render); $("windowSize").addEventListener("change",render);
+  $("demoBtn").addEventListener("click",()=>{rounds=[1.12,1.48,2.1,1.31,3.7,1.06,2.55,6.4,1.82,1.19,4.2,12.6,1.42,2.03,1.27,8.8,1.09,3.1,1.66,5.2].map((value,i)=>({value,ts:Date.now()-(19-i)*60000}));save();render();setMessage("Loaded fictional demo rounds. Replace them with your own recorded data.");});
+  $("exportBtn").addEventListener("click",()=>{if(!rounds.length){setMessage("There are no rounds to export yet.");return;}const csv="multiplier,timestamp\n"+rounds.map(r=>`${r.value},${new Date(r.ts).toISOString()}`).join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="flightdeck-rounds.csv";a.click();URL.revokeObjectURL(url);setMessage("CSV export started.");});
+  $("importBtn").addEventListener("click",()=>$("csvFile").click());
+  $("csvFile").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const text=await file.text();const parsed=text.split(/\r?\n/).slice(1).map(line=>line.split(",")[0].trim()).filter(Boolean).map(Number).filter(v=>Number.isFinite(v)&&v>=1);if(!parsed.length)throw new Error("No valid multiplier values found in the first CSV column.");addValues(parsed);setMessage(`Imported ${parsed.length} multiplier values from CSV.`);}catch(err){setMessage(err.message||"Could not import that CSV file.");}e.target.value="";});
+  $("clearBtn").addEventListener("click",()=>{if(!rounds.length){setMessage("History is already empty.");return;}if(confirm("Delete all recorded rounds from this browser? Export a CSV backup first if you want to keep them.")){rounds=[];save();render();setMessage("History cleared from this browser.");}});
+  window.addEventListener("resize",()=>drawChart(rounds.map(r=>r.value).slice(-Math.max(1,Number($("windowSize").value)||20))));
+  render();
+})();
 </script>
-</body></html>
+</body>
+</html>
